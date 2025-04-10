@@ -10,6 +10,8 @@ public class User {
     private String password;
     private String role;
     private Date createdAt;
+    private String profileImage;
+
     
     // No-arg constructor
     public User() {
@@ -71,6 +73,14 @@ public class User {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
     
     @Override

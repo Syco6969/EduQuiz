@@ -1,21 +1,29 @@
 package dz.eduquiz.servlet;
 
+import java.io.File;
 import java.io.IOException;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.Part;
 import dz.eduquiz.model.User;
 import dz.eduquiz.service.UserService;
 import dz.eduquiz.service.ScoreService;
+import dz.eduquiz.util.FileUtil;
 import dz.eduquiz.util.SessionManager;
 import dz.eduquiz.util.ValidationUtil;
 
 @WebServlet(urlPatterns = {"/register", "/login", "/logout", "/profile", "/updateProfile", "/home"})
+@MultipartConfig(
+	    fileSizeThreshold = 1024 * 1024,    // 1 MB
+	    maxFileSize = 1024 * 1024 * 2,      // 2 MB
+	    maxRequestSize = 1024 * 1024 * 10   // 10 MB
+	)
 public class UserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -283,14 +291,48 @@ public class UserServlet extends HttpServlet {
             return;
         }
         
-        // Update profile using the new combined method
+        // Process profile image if uploaded
+        String profileImageName = null;
+        Part filePart = null;
+        
+        try {
+            filePart = request.getPart("profileImage");
+            if (filePart != null && filePart.getSize() > 0) {
+                // Get the upload directory path
+                String uploadDir = request.getServletContext().getRealPath("") + File.separator + "uploads";
+                
+                // Process the image and get the file name
+                profileImageName = FileUtil.processProfileImage(filePart, uploadDir);
+                System.out.println("Processed profile image: " + profileImageName);
+                
+                // If we have a successful upload and the user already had a profile image, delete the old one
+                if (profileImageName != null && currentUser.getProfileImage() != null && !currentUser.getProfileImage().isEmpty()) {
+                    boolean deleted = FileUtil.deleteFile(currentUser.getProfileImage(), uploadDir);
+                    System.out.println("Deleted old profile image: " + deleted);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error processing profile image: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("imageError", "Error processing image: " + e.getMessage());
+            
+            // Forward back to profile page with error message
+            request.setAttribute("showProfileModal", true);
+            request.setAttribute("quizHistory", scoreService.getScoresByUserId(currentUser.getId()));
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/profile.jsp");
+            dispatcher.forward(request, response);
+            return;
+        }
+        
+        // Update profile using the service
         System.out.println("Calling userService.updateUserProfile");
         boolean success = userService.updateUserProfile(
             currentUser.getId(), 
             username, 
             email, 
             currentPassword, 
-            newPassword
+            newPassword,
+            profileImageName // Pass the new profile image name
         );
         System.out.println("Update result: " + (success ? "SUCCESS" : "FAILED"));
         
@@ -302,6 +344,9 @@ public class UserServlet extends HttpServlet {
             }
             if (email != null && !email.trim().isEmpty()) {
                 currentUser.setEmail(email);
+            }
+            if (profileImageName != null) {
+                currentUser.setProfileImage(profileImageName);
             }
             
             request.getSession().setAttribute("user", currentUser); // Update session

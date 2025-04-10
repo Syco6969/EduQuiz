@@ -105,8 +105,9 @@ public class UserService {
     }
     
     // Update user profile - Enhanced with debugging
+
     public boolean updateUserProfile(int userId, String username, String email, 
-                                   String currentPassword, String newPassword) {
+                                   String currentPassword, String newPassword, String profileImage) {
         try {
             System.out.println("------- Profile Update Request -------");
             System.out.println("UserId: " + userId);
@@ -114,6 +115,7 @@ public class UserService {
             System.out.println("Email: " + email);
             System.out.println("Current password provided: " + (currentPassword != null && !currentPassword.isEmpty()));
             System.out.println("New password provided: " + (newPassword != null && !newPassword.isEmpty()));
+            System.out.println("Profile image provided: " + (profileImage != null && !profileImage.isEmpty()));
             
             // Get current user
             User user = userDAO.getUserById(userId);
@@ -179,6 +181,13 @@ public class UserService {
                 
                 System.out.println("Updating password...");
                 user.setPassword(PasswordHasher.hashPassword(newPassword));
+                hasChanges = true;
+            }
+            
+            // Update profile image if provided
+            if (profileImage != null && !profileImage.trim().isEmpty()) {
+                System.out.println("Updating profile image from '" + user.getProfileImage() + "' to '" + profileImage + "'");
+                user.setProfileImage(profileImage);
                 hasChanges = true;
             }
             
