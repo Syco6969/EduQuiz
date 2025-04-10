@@ -304,6 +304,34 @@
                 }
             });
         });
+        
+     // Add live preview of selected profile image
+        document.getElementById('profileImage').addEventListener('change', function(event) {
+            const fileInput = event.target;
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const previewContainer = document.querySelector('.profile-image-preview');
+                    
+                    // Clear existing content
+                    previewContainer.innerHTML = '';
+                    
+                    // Create and add the image preview
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Profile Preview';
+                    img.className = 'img-fluid';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    
+                    previewContainer.appendChild(img);
+                };
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
     </script>
 </body>
 </html>

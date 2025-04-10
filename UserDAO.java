@@ -89,13 +89,13 @@ public class UserDAO {
     }
     
     // Get user by username - FIXED VERSION
+ // Fix getUserByUsername to include profile_image
     public User getUserByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         
         try (Connection conn = DBConnection.getConnection()) {
             if (conn == null) {
                 System.out.println("Error: Database connection failed in getUserByUsername");
-             // In getUserByUsername and getUserByEmail methods
                 System.out.println("Executing SQL: " + sql + " with parameter: " + username);
                 return null;
             }
@@ -111,29 +111,29 @@ public class UserDAO {
                         user.setEmail(rs.getString("email"));
                         user.setPassword(rs.getString("password"));
                         user.setRole(rs.getString("role"));
+                        user.setProfileImage(rs.getString("profile_image")); // Add this line
                         return user;
                     }
                 }
             }
         } catch (SQLException e) {
             System.out.println("SQL Error in getUserByUsername: " + e.getMessage());
-         // In getUserByUsername and getUserByEmail methods
             System.out.println("Executing SQL: " + sql + " with parameter: " + username);
             e.printStackTrace();
-            return null; // Explicitly return null on exception
+            return null;
         }
         
         return null;
     }
     
     // Get user by email - FIXED VERSION
+ // Fix getUserByEmail to include profile_image
     public User getUserByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
         
         try (Connection conn = DBConnection.getConnection()) {
             if (conn == null) {
                 System.out.println("Error: Database connection failed in getUserByEmail");
-             // In getUserByUsername and getUserByEmail methods
                 System.out.println("Executing SQL: " + sql + " with parameter: " + email);
                 return null;
             }
@@ -149,16 +149,16 @@ public class UserDAO {
                         user.setEmail(rs.getString("email"));
                         user.setPassword(rs.getString("password"));
                         user.setRole(rs.getString("role"));
+                        user.setProfileImage(rs.getString("profile_image")); // Add this line
                         return user;
                     }
                 }
             }
         } catch (SQLException e) {
             System.out.println("SQL Error in getUserByEmail: " + e.getMessage());
-         // In getUserByUsername and getUserByEmail methods
             System.out.println("Executing SQL: " + sql + " with parameter: " + email);
             e.printStackTrace();
-            return null; // Explicitly return null on exception
+            return null;
         }
         
         return null;
