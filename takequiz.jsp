@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/quiz.css">
 </head>
 <body>
-    <jsp:include page="/pages/components/navbar.jsp" />
+    <jsp:include page="/WEB-INF/navbar.jsp" />
     
     <div class="container mt-5">
         <div class="quiz-header">
@@ -114,7 +114,7 @@
         </form>
     </div>
     
-    <jsp:include page="/pages/components/footer.jsp" />
+    <jsp:include page="/WEB-INF/footer.jsp" />
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="${pageContext.request.contextPath}/resources/js/script.js"></script>

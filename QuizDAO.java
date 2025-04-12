@@ -11,9 +11,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import dz.eduquiz.model.Category;
 import dz.eduquiz.model.Quiz;
 
+
+
 public class QuizDAO {
+	
+	public QuizDAO() {
+	    this.categoryDAO = new CategoryDAO();
+	}
+	
+	
+	private CategoryDAO categoryDAO;
     
     // Create a new quiz
     public int createQuiz(Quiz quiz) {
@@ -50,29 +60,33 @@ public class QuizDAO {
     
     // Get quiz by ID
     public Quiz getQuizById(int id) {
+        Quiz quiz = null;
         String sql = "SELECT * FROM quizzes WHERE id = ?";
         
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, id);
-            ResultSet rs = pstmt.executeQuery();
+            stmt.setInt(1, id);
             
-            if (rs.next()) {
-                Quiz quiz = new Quiz();
-                quiz.setId(rs.getInt("id"));
-                quiz.setTitle(rs.getString("title"));
-                quiz.setDescription(rs.getString("description"));
-                quiz.setCategoryId(rs.getInt("category_id"));
-                quiz.setDifficulty(rs.getString("difficulty"));
-                quiz.setTimeLimit(rs.getInt("time_limit"));
-                return quiz;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    quiz = new Quiz();
+                    quiz.setId(rs.getInt("id"));
+                    quiz.setTitle(rs.getString("title"));
+                    quiz.setDescription(rs.getString("description"));
+                    quiz.setCategoryId(rs.getInt("category_id"));
+                    quiz.setDifficulty(rs.getString("difficulty"));
+                    quiz.setTimeLimit(rs.getInt("time_limit"));
+                    
+                    // Populate category info
+                    populateQuizWithCategory(quiz);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
-        return null;
+        return quiz;
     }
     
     // Get all quizzes
@@ -81,8 +95,8 @@ public class QuizDAO {
         String sql = "SELECT * FROM quizzes";
         
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             
             while (rs.next()) {
                 Quiz quiz = new Quiz();
@@ -92,6 +106,10 @@ public class QuizDAO {
                 quiz.setCategoryId(rs.getInt("category_id"));
                 quiz.setDifficulty(rs.getString("difficulty"));
                 quiz.setTimeLimit(rs.getInt("time_limit"));
+                
+                // Populate category info
+                populateQuizWithCategory(quiz);
+                
                 quizzes.add(quiz);
             }
         } catch (SQLException e) {
@@ -157,6 +175,38 @@ public class QuizDAO {
         return quizzes;
     }
     
+    public List<Quiz> searchQuizzesByTitle(String searchTerm) {
+        List<Quiz> result = new ArrayList<>();
+        String sql = "SELECT * FROM quizzes WHERE LOWER(title) LIKE ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, "%" + searchTerm.toLowerCase() + "%");
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Quiz quiz = new Quiz();
+                    quiz.setId(rs.getInt("id"));
+                    quiz.setTitle(rs.getString("title"));
+                    quiz.setDescription(rs.getString("description"));
+                    quiz.setCategoryId(rs.getInt("category_id"));
+                    quiz.setDifficulty(rs.getString("difficulty"));
+                    quiz.setTimeLimit(rs.getInt("time_limit"));
+                    
+                    // Populate category info
+                    populateQuizWithCategory(quiz);
+                    
+                    result.add(quiz);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+    
     // Update quiz
     public boolean updateQuiz(Quiz quiz) {
         String sql = "UPDATE quizzes SET title = ?, description = ?, category_id = ?, difficulty = ?, time_limit = ? WHERE id = ?";
@@ -195,4 +245,13 @@ public class QuizDAO {
             return false;
         }
     }
+    
+    private Quiz populateQuizWithCategory(Quiz quiz) {
+        if (quiz != null && quiz.getCategoryId() > 0) {
+            Category category = categoryDAO.getCategoryById(quiz.getCategoryId());
+            quiz.setCategory(category);
+        }
+        return quiz;
+    }
+
 }

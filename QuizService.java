@@ -113,5 +113,10 @@ public class QuizService {
                (difficulty.equals("easy") || difficulty.equals("medium") || difficulty.equals("hard"));
     }
 
-	
+    public List<Quiz> searchQuizzesByTitle(String searchTerm) {
+        if (!ValidationUtil.isNotEmpty(searchTerm)) {
+            return getAllQuizzes();
+        }
+        return quizDAO.searchQuizzesByTitle(searchTerm);
+    }
 }

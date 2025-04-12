@@ -1,18 +1,19 @@
 package dz.eduquiz.model;
 
-
-
 public class Quiz {
     private int id;
     private String title;
     private String description;
     private int categoryId;
+    private Category category;  // Add this field
     private String difficulty;
     private int timeLimit;
     
+    // Default constructor
     public Quiz() {
     }
     
+    // Constructor with fields
     public Quiz(String title, String description, int categoryId, String difficulty, int timeLimit) {
         this.title = title;
         this.description = description;
@@ -21,7 +22,7 @@ public class Quiz {
         this.timeLimit = timeLimit;
     }
     
-    // Getters and setters
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -54,6 +55,14 @@ public class Quiz {
         this.categoryId = categoryId;
     }
     
+    public Category getCategory() {
+        return category;
+    }
+    
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+    
     public String getDifficulty() {
         return difficulty;
     }
@@ -68,11 +77,5 @@ public class Quiz {
     
     public void setTimeLimit(int timeLimit) {
         this.timeLimit = timeLimit;
-    }
-    
-    @Override
-    public String toString() {
-        return "Quiz [id=" + id + ", title=" + title + ", categoryId=" + categoryId + 
-               ", difficulty=" + difficulty + ", timeLimit=" + timeLimit + "]";
     }
 }
